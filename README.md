@@ -13,7 +13,7 @@ from a language falls back to the fallback language, and missing there
 shows as its name.
 
 ```clojure
-io.github.p4ulcristian/groundwork-languages {:git/tag "v0.4.3" :git/sha "75b7b30"}
+io.github.p4ulcristian/groundwork-languages {:git/tag "v0.4.4" :git/sha "68368a0"}
 ```
 
 Needs malli, jsonista and ICU4J; in the browser, intl-messageformat. One public namespace, `groundwork-languages.api`: a `.clj` for the
