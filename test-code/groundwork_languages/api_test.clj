@@ -37,6 +37,30 @@
         "quality 0 is not wanted"))
   (testing "then the default"
     (is (= "en" (:language (languages/find-language-of-request settings (make-request "/orders" {}))))))
+  (testing "Accept-Language by RFC 4647's lookup, the JDK's"
+    (let [language-of #(:language (languages/find-language-of-request settings (make-request "/orders" {"accept-language" %})))]
+      (is (= "de" (language-of "de-AT")) "a region: its language")
+      (is (= "de" (language-of "DE-at")) "in any case")
+      (is (= "de" (language-of "de-AT-1996")) "each shorter tag in turn")
+      (is (= "en" (language-of "de-AT, de;q=0")) "a region of a language of quality 0: not wanted")
+      (is (= "en" (language-of "*")) "* is no language: the default")
+      (is (= "de" (language-of "*;q=0.5, de;q=0.1")) "* aside, the next")
+      (is (= "hu" (language-of "fr;q=0.9,hu;q=0.8 ,  de;q=0.8")) "spaces; of two equally wanted, the first")
+      (is (= "de" (language-of "fr,\tde ; Q=0.5")) "a tab, spaces around ;, Q in capitals")
+      (is (= "de" (language-of "fr,,de")) "an empty element of the list")
+      (is (= "en" (language-of "de;q=abc")) "a quality that isn't a number: the header isn't read")
+      (is (= "en" (language-of "de;q=1.5")) "a quality above 1: the header isn't read")
+      (is (= "en" (language-of "en_US, de")) "a range that isn't one: the header isn't read")
+      (is (= "en" (language-of "de;q=0.5;level=1")) "a parameter other than q: the header isn't read")
+      (is (= "en" (language-of "")) "an empty header")))
+  (testing "the cookie by RFC 6265's grammar"
+    (let [language-of #(:language (languages/find-language-of-request settings (make-request "/orders" {"cookie" % "accept-language" "de"})))]
+      (is (= "hu" (language-of "lang=\"hu\"")) "a quoted value, without its quotes")
+      (is (= "hu" (language-of "lang=hu; lang=en")) "a name twice: the first")
+      (is (= "hu" (language-of "lang=; lang=hu")) "an empty one is none")
+      (is (= "hu" (language-of "a=b c; =x; nameless; \tlang=hu ")) "bad pairs left out, spaces and tabs around a pair")
+      (is (= "de" (language-of "lang=h u")) "a space in a value: no cookie, Accept-Language")
+      (is (= "de" (language-of "my_lang=hu; lang_old=hu")) "the name exactly")))
   (testing "a first part that isn't a language stays in the path"
     (is (= {:language "en" :path "/deals"} (languages/find-language-of-request settings (make-request "/deals" {})))))
   (testing "no cookie named: it isn't read"

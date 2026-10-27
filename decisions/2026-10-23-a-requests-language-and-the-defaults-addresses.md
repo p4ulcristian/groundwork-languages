@@ -1,3 +1,5 @@
+> **Changed in part** by [Accept-Language is read by the JDK's RFC 4647 lookup](2026-10-27-accept-language-is-read-by-the-jdks-rfc-4647-lookup.md) (2026-10-27, v0.4.4): a range, then each shorter tag of it; a language of quality 0 is not wanted through a longer range either; a header the JDK can't read is none. And by [The language cookie is read by RFC 6265's grammar](2026-10-27-the-language-cookie-is-read-by-rfc-6265s-grammar.md) (2026-10-27, v0.4.4): a quoted value without its quotes, a name twice its first.
+
 > **Changed in part** by [Texts are ICU messages in a flat JSON catalog per language, read by both sides](2026-10-23-texts-are-icu-messages-in-a-json-catalog-per-language.md) (2026-10-23, v0.2.0): the languages read from a prefix, the cookie and Accept-Language are the ones that show: the launched `:languages` and this environment's `:preview-languages`.
 
 # A request's language: the prefix, the cookie, Accept-Language, the default; the default's addresses carry no prefix

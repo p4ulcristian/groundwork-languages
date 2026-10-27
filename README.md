@@ -78,6 +78,14 @@ server, a `.cljs` for the browser.
 (languages/make-path-in-language settings "/orders" "de")   ;=> "/de/orders"
 ```
 
+Accept-Language is read by the JDK, RFC 4647's lookup: each range, most
+wanted first, then each shorter tag of it (`de-AT` finds `de`); a language
+of quality 0 is not wanted, `*` is none, and a header the JDK can't read is
+no wish at all ([why](decisions/2026-10-27-accept-language-is-read-by-the-jdks-rfc-4647-lookup.md)).
+The cookie is read by RFC 6265's grammar: a quoted value without its quotes,
+a bad pair left out, a name twice its first with a value
+([why](decisions/2026-10-27-the-language-cookie-is-read-by-rfc-6265s-grammar.md)).
+
 ## Tests
 
 ```sh
