@@ -3,12 +3,12 @@
   "private": true,
   "description": "dictionary's ClojureScript test build; intl-messageformat makes a message into text in the browser",
   "dependencies": {
-    "intl-messageformat": "12.1.4"
+    "intl-messageformat": "12.1.5"
   },
   "scripts": {
     "test": "shadow-cljs compile test"
   },
   "devDependencies": {
-    "shadow-cljs": "3.5.7"
+    "shadow-cljs": "3.5.13"
   }
 }
