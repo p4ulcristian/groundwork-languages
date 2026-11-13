@@ -3,6 +3,7 @@
    Accept-Language and the default; the alternate links; the settings
    checked."
   (:require
+   [clojure.java.io :as io]
    [clojure.test :refer [deftest is testing]]
    [groundwork-languages.api :as languages]))
 
@@ -16,8 +17,8 @@
 (deftest the-names-of-the-api
   (is (= '#{settings-shape check-settings find-language-of-request make-alternate-links
             split-language-from-path make-path-in-language list-live-languages list-languages-to-pick
-            list-catalog-files load-texts with-language tr read-bound-language find-problems-in-catalogs
-            check-texts-of-reasons}
+            list-catalog-files load-texts make-texts-reader with-language tr read-bound-language
+            find-problems-in-catalogs check-texts-of-reasons}
          (set (keys (ns-publics 'groundwork-languages.api))))))
 
 (deftest a-requests-language
@@ -122,6 +123,24 @@
     (is (= {:language "en" :path "/hu/orders"} (languages/find-language-of-request production (make-request "/hu/orders" {"accept-language" "hu"})))
         "not shown: neither its prefix nor Accept-Language")
     (is (= ["en" "de"] (map :hreflang (butlast (languages/make-alternate-links production "https://x" "/")))))))
+
+(deftest a-reader-of-the-texts
+  (testing "read once: the same texts every call"
+    (let [texts-now (languages/make-texts-reader settings false)]
+      (is (= (languages/load-texts settings) (texts-now)))
+      (is (identical? (texts-now) (texts-now)))))
+  (testing "watching: read again only when a catalog's file changed"
+    (let [texts-now (languages/make-texts-reader settings true)
+          first     (texts-now)
+          file      (io/file (io/resource "groundwork_languages_test/i18n/de.json"))
+          was       (.lastModified file)]
+      (is (identical? first (texts-now)) "nothing changed: the same texts")
+      (try
+        (.setLastModified file (+ was 2000))
+        (let [again (texts-now)]
+          (is (not (identical? first again)) "a changed file: read again")
+          (is (= first again)))
+        (finally (.setLastModified file was))))))
 
 (deftest texts-in-a-language
   (let [texts (languages/load-texts settings)]

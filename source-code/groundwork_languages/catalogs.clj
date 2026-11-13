@@ -44,6 +44,34 @@
                       {:type :groundwork-languages/missing-catalogs :resources missing})))
     {:fallback-language fallback-language :catalogs read}))
 
+(defn- find-catalog-times
+  "Each catalog's file's last change, by resource; 0 for one inside a jar,
+   which never changes, and for one that isn't there."
+  [settings]
+  (into {}
+        (map (fn [{:keys [resource]}]
+               (let [url (io/resource resource)]
+                 [resource (if (and url (= "file" (.getProtocol url)))
+                             (.lastModified (io/file url))
+                             0)])))
+        (list-catalog-files settings)))
+
+(defn make-texts-reader
+  "A function of no arguments giving the texts (load-texts's). watch?
+   false: read once, here. watch? true, where a place watches its files
+   (development): each call looks at the catalogs' files and reads them
+   all again when one changed, so an edited catalog is what the next call
+   gives; a catalog that can't be read then throws from that call."
+  [settings watch?]
+  (if-not watch?
+    (constantly (load-texts settings))
+    (let [read (atom {:times (find-catalog-times settings) :texts (load-texts settings)})]
+      (fn []
+        (let [times (find-catalog-times settings)]
+          (:texts (if (= times (:times @read))
+                    @read
+                    (reset! read {:times times :texts (load-texts settings)}))))))))
+
 (defn- format-message [^String message ^String language args]
   (.format (MessageFormat. message (ULocale. language)) ^Map (HashMap. ^Map (texts/turn-args-into-names args))))
 

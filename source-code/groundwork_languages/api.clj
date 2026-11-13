@@ -109,6 +109,19 @@
   [settings]
   (catalogs/load-texts settings))
 
+(defn make-texts-reader
+  "A function of no arguments giving the texts (load-texts's), for a
+   server that hands them to every request. watch? false: the catalogs
+   read once, here. watch? true, for a place that watches its files
+   (development): each call reads them all again when one of their files
+   changed, so an edited catalog shows on the next request without a
+   restart; one that can't be read then throws from that call.
+
+     (def texts-now (languages/make-texts-reader settings false))
+     (languages/with-language (texts-now) \"de\" ...)"
+  [settings watch?]
+  (catalogs/make-texts-reader settings watch?))
+
 (defmacro with-language
   "Runs body with texts and the language bound, for every tr inside (and
    on the threads Clojure starts from there: future, pmap, agents; a Java
